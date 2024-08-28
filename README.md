@@ -1,5 +1,5 @@
 # MMTS-GEE
-Supplementary material for the article "Introducing MMTS-GEE: A Google Earth Engine Tool for Generating Customizable Multi-Modal Time Series Datasets with a Case Study on analyzing SAR and optical features in the Czech Forests"
+Supplementary material for the article "Identification of Optimal Sentinel-1 SAR Polarimetric Parameters for Forest Monitoring in Czechia"
 
 ![Fig  2](https://github.com/user-attachments/assets/4ade6475-bbfb-45d2-9f1b-2309e0c822b8)
 _Data pre-processing and preparation workflow of the MMTS-GEE._
