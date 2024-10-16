@@ -455,9 +455,9 @@ else if(NullHandling == 'IncludeAllNulls'){
 // export data to Drive
 Export.table.toDrive({
     collection: to_export,
-    description: 'MMT_GEE_data',
-    folder: 'MMT_GEE',
-    fileNamePrefix: 'MMT_GEE_data',
+    description: 'MMTS_GEE_data',
+    folder: 'MMTS_GEE',
+    fileNamePrefix: 'MMTS_GEE_data',
     fileFormat: 'CSV'
 });
 
