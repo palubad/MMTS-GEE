@@ -20,9 +20,9 @@ var GenerateRandomPoints = 'NO';
 */
 
 // 2. A) Settings if 'YES' was set in GenerateRandomPoints
-var ESA_LC_type = 10; // 10 for forest cover 
-var numberOfRandomPoints = 1000; 
-var buffer = 20;
+// var ESA_LC_type = 10; // 10 for forest cover 
+// var numberOfRandomPoints = 1000; 
+// var buffer = 20;
 
 // 2. B) Import and use your own FeatureCollection if 'NO' was set in GenerateRandomPoints
 var coniferous = ee.FeatureCollection("users/danielp/philab/coniferous_FINAL"),
