@@ -32,7 +32,7 @@ var ROI = ee.FeatureCollection("users/danielp/philab/coniferous_FINAL")
 // var countries = ee.FeatureCollection("FAO/GAUL/2015/level0");
 // var broadGeometry = countries.filter(ee.Filter.eq('ADM0_NAME','Czech Republic'));
 // 3. B) Select the area based on your input data, applicable when you uploaded your own data in 2. B)
-var broadGeometry = ee.Feature(ROI.union().first()).bounds().buffer(1000); // add a 1 km buffer
+var broadGeometry = ee.Feature(ROI.union().first()).bounds().buffer(1000).geometry(); // add a 1 km buffer
 
 // 4. Set Sentinel-2 data preprocessing 
 // 4.1. Set the maximum threshold for single image cloud coverage for S2 data
