@@ -20,18 +20,19 @@ var GenerateRandomPoints = 'NO';
 */
 
 // 2. A) Settings if 'YES' was set in GenerateRandomPoints
-// var ESA_LC_type = 10; // 10 for forest cover 
-// var numberOfRandomPoints = 1000; 
-// var buffer = 20;
+var ESA_LC_type = 10; // 10 for forest cover 
+var numberOfRandomPoints = 1000; 
+var buffer = 20;
 
 // 2. B) Import and use your own FeatureCollection if 'NO' was set in GenerateRandomPoints
-var coniferous = ee.FeatureCollection("users/danielp/philab/coniferous_FINAL"),
-    deciduous = ee.FeatureCollection("users/danielp/philab/deciduous_FINAL");
-var ROI = coniferous.limit(600); //select the first 600 areas from coniferous dataset
+var ROI = ee.FeatureCollection("users/danielp/philab/coniferous_FINAL")
 
 // 3. Select a broader geometry for your analysis, e.g. a country or draw your own ROI
-var countries = ee.FeatureCollection("USDOS/LSIB/2017");
-var broadGeometry = countries.filter(ee.Filter.eq('COUNTRY_NA','Czechia'));
+// 3. A) Select a country
+// var countries = ee.FeatureCollection("FAO/GAUL/2015/level0");
+// var broadGeometry = countries.filter(ee.Filter.eq('ADM0_NAME','Czech Republic'));
+// 3. B) Select the area based on your input data, applicable when you uploaded your own data in 2. B)
+var broadGeometry = ee.Feature(ROI.union().first()).bounds().buffer(1000); // add a 1 km buffer
 
 // 4. Set Sentinel-2 data preprocessing 
 // 4.1. Set the maximum threshold for single image cloud coverage for S2 data
