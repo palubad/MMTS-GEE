@@ -82,7 +82,7 @@ var NullHandling = 'ExcludeAllNulls';
 
 // Load ancillary data
 var CoprenicusDEM = ee.ImageCollection("COPERNICUS/DEM/GLO30").select('DEM').filterBounds(broadGeometry),
-    gfc = ee.Image("UMD/hansen/global_forest_change_2022_v1_10"),
+    gfc = ee.Image("UMD/hansen/global_forest_change_2023_v1_11"),
     ESAWC = ee.ImageCollection("ESA/WorldCover/v200").first(),
     CGLC = ee.Image("COPERNICUS/Landcover/100m/Proba-V-C3/Global/2019")
             .select('discrete_classification'),
