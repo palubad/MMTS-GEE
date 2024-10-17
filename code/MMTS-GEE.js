@@ -51,7 +51,8 @@ var listOfOpticalVIs = ['NDVI','FAPAR','LAI','EVI'];
 
 // 6. Select SAR polarimetric indices to export.
 //    predefined options are: 'RVI', 'RFDI', 'NRPB','VH_VV','VV_VH', 'DPSVIm', 'DPSVIo'
-var listOfSARindices = ['VV','VH','RVI', 'RFDI', 'NRPB','VH/VV','VV/VH', 'DPSVIm'];
+//    VV and VH are automatically generated
+var listOfSARindices = ['RVI', 'RFDI', 'NRPB','VH/VV','VV/VH', 'DPSVIm'];
 
 // 7. Select whether to perform speckle filtering using Lee filter. 
 //    If 'YES', set the kernel window size. 
@@ -178,7 +179,9 @@ var addSARIndices = function(img) {
       'VV': img.select('VV')
   }).rename('DPSVIm');
  
-  return img.addBands([RVI, RFDI, NRPB,VH_VV,VV_VH, DPSVIm]).select(listOfSARindices);
+  var SARindices = ee.Image(0).addBands([VV,VH, RVI, RFDI, NRPB,VH_VV,VV_VH, DPSVIm]);
+ 
+  return img.addBands(SARindices.select(listOfSARindices));
 };
 
 
