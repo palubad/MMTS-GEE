@@ -145,6 +145,8 @@ print('Number of S-2 images after filtering', S2.size());
 var S1Collection = ee.ImageCollection('COPERNICUS/S1_GRD_FLOAT')
                   .filterBounds(ROI.geometry())
                   .filterDate(startDate, endDate)
+                  .filter(ee.Filter.listContains('transmitterReceiverPolarisation', 'VV'))
+                  .filter(ee.Filter.listContains('transmitterReceiverPolarisation', 'VH'))
 print('Number of S-1 images after filtering', S1Collection.size());
 
 
