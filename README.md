@@ -1,5 +1,6 @@
-# MMTS-GEE
-Supplementary material for the article "Identification of Optimal Sentinel-1 SAR Polarimetric Parameters for Forest Monitoring in Czechia"
+# A Google Earth Engine tool to generate multi-modal and multi-temporal datasets (MMTS-GEE)
+A Google Earth Engine tool to generate multi-modal and multi-temporal datasets, including spatially and temporally aligned Sentinel-1 SAR data, Sentinel-2 multispectral data, weather and DEM-based data.
+It is a supplementary material for the article "Identification of Optimal Sentinel-1 SAR Polarimetric Parameters for Forest Monitoring in Czechia" by Daniel Paluba, Bertrand Le Saux, Francesco Sarti and Přemysl Štych, published in the AUC Geographica journal [accepted for publication, the online version will be available soon].
 
 ![Fig  2](https://github.com/user-attachments/assets/4ade6475-bbfb-45d2-9f1b-2309e0c822b8)
 _Data pre-processing and preparation workflow of the MMTS-GEE._
