@@ -506,7 +506,7 @@ else if(NullHandling == 'IncludeAllNulls'){
   var to_export = getData.flatten().filter(ee.Filter.neq('LAI',0)).filter(ee.Filter.neq('DEM',0));
   print('All Null values will be included in the expored table.')
 }
-print(to_export)
+
 // export data to Drive
 Export.table.toDrive({
     collection: to_export,
