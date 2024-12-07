@@ -9,11 +9,11 @@ The MMTS-GEE is designed to efficiently generate comprehensive datasets for mult
 
 <br>
 If you use this tool, please cite the following paper:
-
+<br>
 > Paluba, D., Le Saux, B., Sarti, F., Štych, P. (2024): Identification of Optimal Sentinel-1 SAR Polarimetric Parameters for Forest Monitoring in Czechia. AUC Geographica 59(2), 1–15, DOI: [10.14712/23361980.2024.18](https://doi.org/10.14712/23361980.2024.18).
 
 <br>
-The MMTS-GEE tool is also available directly from GEE:
+The MMTS-GEE tool is also available directly from GEE [under this link](https://code.earthengine.google.com/c35d143d1efd2ae2abcd77e35d8aa746?noload=true).
 
 
 ![Fig  2](https://github.com/user-attachments/assets/4ade6475-bbfb-45d2-9f1b-2309e0c822b8)
