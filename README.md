@@ -4,13 +4,12 @@ A Google Earth Engine tool to generate multi-modal and time series datasets with
   - Sentinel-2 L2A multispectral data (cloud-masked) with predefined vegetation indices (NDVI,NDVIrededge,FAPAR,LAI, EVI, NDMI);
   - Climatic variables from ERA5-Land (temperature at the hour of SAR acquisition and total precipitation 12 hours prior the SAR acquisition) and 
   - Copernicus DEM-based topographical features (elevation, slope, aspect, Sentinel-1 Local Incidence Angle).
-  - + a land cover type based on ESA WorldCover 2021
+  - plus a land cover type based on ESA WorldCover 2021
 <br></br>
+
 The MMTS-GEE is designed to efficiently generate comprehensive datasets for multi-modal and multi-temporal analyses or various machine learning tasks. Its flexibility allows users to customize data generation for specific research goals.
-
 <br></br>
-If you use this tool, please cite the following paper: <br></br>
-
+If you use this tool, please cite the following paper:
 > Paluba, D., Le Saux, B., Sarti, F., Štych, P. (2024): Identification of Optimal Sentinel-1 SAR Polarimetric Parameters for Forest Monitoring in Czechia. AUC Geographica 59(2), 1–15, DOI: [10.14712/23361980.2024.18](https://doi.org/10.14712/23361980.2024.18).
 
 <br></br>
