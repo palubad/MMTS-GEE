@@ -1,3 +1,26 @@
+/*
+You have accessed the Google Earth Engine tool to generate multi-modal time series 
+datasets (MMTS-GEE). 
+
+This tool generates time series with spatially and temporally aligned:
+  - Sentinel-1 SAR data, including SAR polarimetric indices, speckle filtering;
+  - Sentinel-2 multispectral data (cloud-masked) with vegetation indices;
+  - climatic variables from ERA5-Land (temperature and precipitation) and 
+  - Copernicus DEM-based topographical features (elevation, slope, aspect, Sentinel-1 Local Incidence Angle, ). 
+
+The MMTS-GEE is designed to efficiently generate comprehensive datasets for multi-modal 
+and multi-temporal analyses or various machine learning tasks. Its flexibility allows users 
+to customize data generation for specific research goals.
+
+If you use this tool, please cite the following paper:
+  Paluba, D., Le Saux, B., Sarti, F., Štych, P. (2024): 
+  Identification of Optimal Sentinel-1 SAR Polarimetric Parameters for Forest Monitoring 
+  in Czechia. AUC Geographica 59(2), 1–15, DOI: https://doi.org/10.14712/23361980.2024.18
+
+The full documentation on the use of this can be found on GitHub: 
+  github.com/palubad/MMTS-GEE
+*/
+
 // ========================================================================================
 // =========================== START OF USER SETTINGS =====================================
 // ========================================================================================
