@@ -30,12 +30,13 @@ var startDate = '2021-01-01',
     endDate =   '2022-01-01';
 
 // 2. Decide whether to generate random points based on a predefined land cover 
-//    dataset or bring your own data. 
-var GenerateRandomPoints = 'NO';
+//    dataset or upload your own data. 
+var GenerateRandomPoints = 'YES';
 /* 
   If 'YES':
-          2.1. Set for which land cover type, based on ESA World Cover 2021, do you want to generate them in the ESA_LC_type variable.
-                for available land cover classes see https://developers.google.com/earth-engine/datasets/catalog/ESA_WorldCover_v200 
+          2.1. Set an integer value (10-100) to ESA_LC_type to define for which land cover type do you want to generate your random points.
+               Set 'ALL' if you want to include each land cover type. The ESA World Cover 2021 used here.
+               See the available land cover classes and their integer values: https://developers.google.com/earth-engine/datasets/catalog/ESA_WorldCover_v200 
           2.2. Set how many random points to generate in the numberOfRandomPoints variable.
           2.3. Set the buffer around random points (in meters) in the buffer variable.
   If 'NO':
@@ -43,17 +44,21 @@ var GenerateRandomPoints = 'NO';
 */
 
 // 2. A) Settings if 'YES' was set in GenerateRandomPoints
-var ESA_LC_type = 10; // 10 for forest cover 
+var ESA_LC_type = 'ALL'; // use 'ALL' if you want to generate random points for each land cover type
+                        // set e.g. 10 for forest cover 
 var numberOfRandomPoints = 1000; 
-var buffer = 20;
+var buffer = 20;         // set a square buffer around points 
 
 // 2. B) Import and use your own FeatureCollection if 'NO' was set in GenerateRandomPoints
-var ROI = ee.FeatureCollection("users/danielp/philab/coniferous_FINAL")
+var ROI = ee.FeatureCollection("users/danielp/philab/coniferous_FINAL");
+// for conif: "projects/danielp-cuni/assets/philab/conif_CentralEurope_FINAL"
 
-// 3. Select a broader geometry for your analysis, e.g. a country or draw your own ROI
+// 3. Select a broader geometry for your analysis, e.g. a country or draw/upload your own area
+var countries = ee.FeatureCollection("FAO/GAUL/2015/level0");
+
 // 3. A) Select a country
-// var countries = ee.FeatureCollection("FAO/GAUL/2015/level0");
 // var broadGeometry = countries.filter(ee.Filter.eq('ADM0_NAME','Czech Republic'));
+
 // 3. B) Select the area based on your input data, applicable when you uploaded your own data in 2. B)
 var broadGeometry = ee.Feature(ROI.union().first()).bounds().buffer(1000).geometry(); // add a 1 km buffer
 
@@ -74,8 +79,7 @@ var listOfOpticalVIs = ['NDVI','FAPAR','LAI','EVI'];
 
 // 6. Select SAR polarimetric indices to export.
 //    predefined options are: 'RVI', 'RFDI', 'NRPB','VH_VV','VV_VH', 'DPSVIm', 'DPSVIo'
-//    VV and VH are automatically generated
-var listOfSARindices = ['RVI', 'RFDI', 'NRPB','VH/VV','VV/VH', 'DPSVIm'];
+var listOfSARindices = ['VV','VH','RVI', 'RFDI', 'NRPB','VH/VV','VV/VH', 'DPSVIm'];
 
 // 7. Select whether to perform speckle filtering using Lee filter. 
 //    If 'YES', set the kernel window size. 
@@ -118,8 +122,13 @@ if (GenerateRandomPoints == 'YES'){
   // add land cover and forest-oriented databases
   var ESAWC = ee.ImageCollection("ESA/WorldCover/v200").first();
   
-  // Load the ESA WorldCover Layers and use only the selected land cover type
-  var ESAWC_selected = ESAWC.updateMask(ESAWC.eq(ESA_LC_type));
+  if (ESA_LC_type == 'ALL') {
+    var ESAWC_selected = ESAWC;
+  } 
+  else
+    // Load the ESA WorldCover Layers and use only the selected land cover type
+    var ESAWC_selected = ESAWC.updateMask(ESAWC.eq(ESA_LC_type));
+  
   
   Map.addLayer(ESAWC_selected.clip(broadGeometry), {}, 'Selected land cover type');
   
@@ -138,8 +147,13 @@ if (GenerateRandomPoints == 'YES'){
                             scale: 20,
                         });
   
-  // Select points which fall (at least partly) into the masked region
-  var validPoints = calculatedPoints.filter(ee.Filter.eq('mean', ESA_LC_type));
+  if (ESA_LC_type == 'ALL') {
+    // Select only areas that are fully inside one selected land cover type
+    var validPoints = calculatedPoints.filter(ee.Filter.inList('mean',[10,20,30,40,50,60,70,80,90,95,100]));
+  } 
+  else
+    // Select points which fall (at least partly) into the masked region
+    var validPoints = calculatedPoints.filter(ee.Filter.eq('mean', ESA_LC_type));
   
   ROI = validPoints
 }
@@ -492,7 +506,7 @@ else if(NullHandling == 'IncludeAllNulls'){
   var to_export = getData.flatten().filter(ee.Filter.neq('LAI',0)).filter(ee.Filter.neq('DEM',0));
   print('All Null values will be included in the expored table.')
 }
-
+print(to_export)
 // export data to Drive
 Export.table.toDrive({
     collection: to_export,
