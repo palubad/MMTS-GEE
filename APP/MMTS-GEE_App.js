@@ -76,12 +76,22 @@ var textLink3 = ui.Label(' DOI: 10.14712/23361980.2024.18',
 //   widgets:[header, text, header2],//Adds header and text
 //   style:{width: '500px',position:'middle-right', margin: '10px'}});
 
+var Github1 = ui.Label(
+  'Give it a STAR',
+    {fontSize: '10px', margin:'5px 0px 0px 8px'});
+
+var Github2 = ui.Label(' on GitHub.',
+  {fontSize: '10px', margin:'5px 0px 0px 4px',color:'blue'})
+  .setUrl('https://github.com/palubad/MMTS-GEE');
+ 
+
 panel.add(header);
 panel.add(header2);
 panel.add(text3);
 panel.add(textLink3);
 panel.add(text2);
 panel.add(textLink);
+panel.add((ui.Panel([Github1, Github2],ui.Panel.Layout.flow('horizontal'))))
 
 
 // Create variable for additional text and separators
@@ -117,8 +127,7 @@ var endLabel = ui.Label({
 panel.add((ui.Panel([startLabel, endLabel],ui.Panel.Layout.flow('horizontal'))))
 
 var datePanel = ui.Panel({
-  layout: ui.Panel.Layout.flow('horizontal'),
-  style: {margin: '10px 0'}
+  layout: ui.Panel.Layout.flow('horizontal')
 });
 var startDateInput = ui.Textbox({placeholder: 'YYYY-MM-DD', value: '2021-01-01', style: {width: '100px'}});
 var endDateInput = ui.Textbox({placeholder: 'YYYY-MM-DD', value: '2022-01-01', style: {width: '100px'}});
@@ -141,9 +150,9 @@ panel.add(ui.Label('2. Set the data for time series generation', {'fontWeight':'
 
 // Divider for Random Point Generator
 panel.add(ui.Label({value:"Decide whether to generate random points based on a predefined land cover dataset or upload your own data. ", style: {margin: '0 0px 0 10px',fontSize: '12px'}}));
-panel.add(ui.Label({value:"2.1. Set an integer value (10-100) to ESA_LC_type to define for which land cover type do you want to generate your random points. Set 'ALL' if you want to include each land cover type. The ESA World Cover 2021 used here. See the available land cover classes and their integer values: https://developers.google.com/earth-engine/datasets/catalog/ESA_WorldCover_v200", style: {margin: '0 0px 0 10px',fontSize: '10px'}}));
-panel.add(ui.Label({value:"2.2. Set how many random points to generate in the numberOfRandomPoints variable.", style: {margin: '0 0px 0 10px',fontSize: '10px'}}));
-panel.add(ui.Label({value:"2.3. Set the buffer around random points (in meters) in the buffer variable. ", style: {margin: '0 0px 0 10px',fontSize: '10px'}}));
+// panel.add(ui.Label({value:"2.1. Set an integer value (10-100) to ESA_LC_type to define for which land cover type do you want to generate your random points. Set 'ALL' if you want to include each land cover type. The ESA World Cover 2021 used here. See the available land cover classes and their integer values: https://developers.google.com/earth-engine/datasets/catalog/ESA_WorldCover_v200", style: {margin: '0 0px 0 10px',fontSize: '10px'}}));
+// panel.add(ui.Label({value:"2.2. Set how many random points to generate in the numberOfRandomPoints variable.", style: {margin: '0 0px 0 10px',fontSize: '10px'}}));
+// panel.add(ui.Label({value:"2.3. Set the buffer around random points (in meters) in the buffer variable. ", style: {margin: '0 0px 0 10px',fontSize: '10px'}}));
 
 
 // Random Points Checkbox
@@ -440,13 +449,13 @@ if (GenerateRandomPoints == 'YES'){
   
   if (ESA_LC_type == 'ALL') {
     // Select only areas that are fully inside one selected land cover type
-    var validPoints = calculatedPoints.filter(ee.Filter.inList('mean',[10,20,30,40,50,60,70,80,90,95,100]));
+    var validPoints = calculatedPoints.select('mean','ESA_WC_LC_type').filter(ee.Filter.inList('ESA_WC_LC_type',[10,20,30,40,50,60,70,80,90,95,100]));
     print('Size of the final set of areas:', ROI.size())
     
   } 
   else
     // Select points which fall (at least partly) into the masked region
-    var validPoints = calculatedPoints.filter(ee.Filter.eq('mean', ESA_LC_type));
+    var validPoints = calculatedPoints.select('mean','ESA_WC_LC_type').filter(ee.Filter.eq('ESA_WC_LC_type', ESA_LC_type));
     print('Size of the final set of areas:', ROI.size())
 
   ROI = validPoints
