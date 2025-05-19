@@ -12,10 +12,15 @@ The MMTS-GEE is designed to efficiently generate comprehensive datasets for mult
 and multi-temporal analyses or various machine learning tasks. Its flexibility allows users 
 to customize data generation for specific research goals.
 
-If you use this tool, please cite the following paper:
+If you use this tool, please cite the following papers:
   Paluba, D., Le Saux, B., Sarti, F., Štych, P. (2024): 
   Identification of Optimal Sentinel-1 SAR Polarimetric Parameters for Forest Monitoring 
   in Czechia. AUC Geographica 59(2), 1–15, DOI: https://doi.org/10.14712/23361980.2024.18
+
+  Paluba, D.; Le Saux, B.; Sarti, F.; Štych, P. (2025): 
+  Estimating vegetation indices and biophysical parameters for Central European temperate 
+  forests with Sentinel-1 SAR data and machine learning. 
+  Big Earth Data.  DOI: 10.1080/20964471.2025.2459300
 
 The full documentation on the use of this can be found on GitHub: 
   github.com/palubad/MMTS-GEE
@@ -141,10 +146,29 @@ panel.add(ui.Label({value:"2.2. Set how many random points to generate in the nu
 panel.add(ui.Label({value:"2.3. Set the buffer around random points (in meters) in the buffer variable. ", style: {margin: '0 0px 0 10px',fontSize: '10px'}}));
 
 
-// Random Point Generation
+// Random Points Checkbox
 var genPointsCheckbox = ui.Checkbox('Generate random points', true);
+panel.add(genPointsCheckbox);
 
-// Land cover type dropdown
+// Own Data Checkbox
+var ownDataCheckbox = ui.Checkbox('I have my own data points/areas uploaded as GEE Asset at:');
+panel.add(ownDataCheckbox);
+
+// Textbox for GEE asset path
+var assetTextbox = ui.Textbox({
+  placeholder: 'users/yourusername/your_asset_path',
+  value: '',
+  style: {stretch: 'horizontal'}
+});
+var assetPanel = ui.Panel([assetTextbox], ui.Panel.Layout.flow('vertical'));
+assetPanel.style().set('shown', false); // Hidden by default
+panel.add(assetPanel);
+
+// --- Random Point Settings Panel ---
+var advancedPanel = ui.Panel({layout: ui.Panel.Layout.flow('vertical')});
+advancedPanel.style().set('shown', true); // Shown by default
+
+// Dropdown for land cover type
 var lcDropdown = ui.Select({
   items: ['ALL', '10 - Tree cover', '20 - Shrubland', '30 - Grassland', '40 - Cropland', '50 - Built-up'],
   value: 'ALL',
@@ -154,36 +178,81 @@ var lcDropdown = ui.Select({
 // Number of Points
 var numPointsSlider = ui.Slider({min: 400, max: 10000, step: 100, value: 1000});
 
-// Buffer size
-var bufferInput = ui.Textbox({value: '20',style: {width: '40px'}});
-var horizontal1 = ui.Panel([ui.Label('Buffer (m)'), bufferInput],ui.Panel.Layout.flow('horizontal'))
+// Buffer input
+var bufferInput = ui.Textbox({value: '20', style: {width: '40px'}});
+var bufferRow = ui.Panel([ui.Label('Buffer (m)'), bufferInput], ui.Panel.Layout.flow('horizontal'));
 
-var vertical_panel1 = ui.Panel([genPointsCheckbox, ui.Label('Number of points'), numPointsSlider],ui.Panel.Layout.flow('vertical'))
+// Vertical panels for layout
+var panel1 = ui.Panel([ui.Label('Number of points'), numPointsSlider], ui.Panel.Layout.flow('vertical'));
+var panel2 = ui.Panel([ui.Label('ESA Land Cover Type'), lcDropdown], ui.Panel.Layout.flow('vertical'));
 
-var vertical_panel2 = ui.Panel([ui.Label('ESA Land Cover Type'), lcDropdown, horizontal1],ui.Panel.Layout.flow('vertical'))
-panel.add((ui.Panel([vertical_panel1, vertical_panel2],ui.Panel.Layout.flow('horizontal'))))
+advancedPanel.add(ui.Panel([panel1, panel2], ui.Panel.Layout.flow('horizontal')));
+advancedPanel.add(bufferRow);
 
-
-// Load FAO GAUL dataset to get available countries
+// Country dropdown
 var countries = ee.FeatureCollection("USDOS/LSIB_SIMPLE/2017").sort('country_na');
 var countryList = countries.aggregate_array('country_na').getInfo();
 var countryCodes = countries.aggregate_array('country_co').getInfo();
 
-// Create country dictionary
+// Dictionary for dropdown value mapping
 var countryDict = {};
 for (var i = 0; i < countryList.length; i++) {
   countryDict[countryList[i]] = countryCodes[i];
 }
 
-// Country selection dropdown
 var countrySelector = ui.Select({
   items: Object.keys(countryDict),
   placeholder: 'Select a country',
   value: 'Czechia'
 });
 
-panel.add((ui.Panel([ui.Label('Select a country for random points', {margin:'12px 0px 0px 8px'}), countrySelector],ui.Panel.Layout.flow('horizontal'))))
+var countryPanel = ui.Panel([
+  ui.Label('Select a country for random points', {margin: '12px 0px 0px 8px'}),
+  countrySelector
+], ui.Panel.Layout.flow('horizontal'));
 
+
+// Country dropdown (already created earlier)
+var countrySelectorPanel = ui.Panel([
+  ui.Label('Country:', {margin: '8px 0px 0px 8px'}),
+  countrySelector
+], ui.Panel.Layout.flow('horizontal'));
+
+advancedPanel.add((ui.Panel([ui.Label('Select a country for random points', {margin:'12px 0px 0px 8px'}), countrySelector],ui.Panel.Layout.flow('horizontal'))))
+
+// advancedPanel.add(countryPanel);
+panel.add(advancedPanel);
+
+
+// --- Toggle Logic ---
+
+// Logic for mutually exclusive checkboxes
+genPointsCheckbox.onChange(function(checked) {
+  if (checked) {
+    ownDataCheckbox.setValue(false, false);  // false = no event trigger
+    assetPanel.style().set('shown', false);
+    advancedPanel.style().set('shown', true);
+  } else {
+    // Only hide if the other one isn’t enabled
+    if (!ownDataCheckbox.getValue()) {
+      advancedPanel.style().set('shown', false);
+    }
+  }
+});
+
+ownDataCheckbox.onChange(function(checked) {
+  if (checked) {
+    genPointsCheckbox.setValue(false, false);
+    advancedPanel.style().set('shown', false);
+    assetPanel.style().set('shown', true);
+  } else {
+    assetPanel.style().set('shown', false);
+    if (!genPointsCheckbox.getValue()) {
+      // If both are off, hide both UI panels
+      advancedPanel.style().set('shown', false);
+    }
+  }
+});
 
 // This creates another panel to house a line separator and instructions for the user
 var intro3 = ui.Panel([
@@ -199,9 +268,11 @@ panel.add(ui.Label('3. Set the preprocessing for optical and SAR data', {'fontWe
 
 // Cloud threshold
 var cloudSlider = ui.Slider({min: 0, max: 100, step: 1, value: 30});
-panel.add(ui.Label('Sentinel-2 data preprocessing'));
-panel.add((ui.Panel([ui.Label('Max Cloud cover (%)'), cloudSlider],ui.Panel.Layout.flow('horizontal'))))
+panel.add(ui.Label('Sentinel-2 data preprocessing', {fontWeight: 'bold'}));
+panel.add((ui.Panel([ui.Label('Max cloud cover (%)'), cloudSlider],ui.Panel.Layout.flow('horizontal'))))
 
+var thresholdSlider = ui.Slider({min: 0, max: 1, step: 0.01, value: 0.6});
+panel.add((ui.Panel([ui.Label("CloudScore+ 'cs' threshold"), thresholdSlider],ui.Panel.Layout.flow('horizontal'))))
 
 // Optical & SAR Indices Checkboxes
 var opticalOptions = ['NDVI', 'FAPAR', 'LAI', 'EVI'];
@@ -232,10 +303,20 @@ createCheckboxGrid(opticalOptions, opticalCheckboxes, 4).forEach(function(row) {
   panel.add(row);
 });
 
-panel.add(ui.Label('Sentinel-1 data preprocessing'));
+// This creates another panel to house a line separator and instructions for the user
+var intro4 = ui.Panel([
+  ui.Label({
+    value: '_______________________________________________',
+    style: {fontWeight: 'bold',  color: '77797e'},
+  })]);
+
+// Add panel to the larger panel 
+panel.add(intro4)
+
+panel.add(ui.Label('Sentinel-1 data preprocessing', {fontWeight: 'bold'}));
 
 var CheckboxSpeckle = ui.Checkbox('Lee speckle filter', true);
-var speckleKernelInput = ui.Textbox({value: '5',style: {width: '30px'}});
+var speckleKernelInput = ui.Textbox({value: 5,style: {width: '30px'}});
 
 panel.add((ui.Panel([CheckboxSpeckle, ui.Label('Kernel window size:'), speckleKernelInput], ui.Panel.Layout.flow('horizontal'))))
 
@@ -245,15 +326,28 @@ createCheckboxGrid(sarOptions, sarCheckboxes, 4).forEach(function(row) {
   panel.add(row);
 });
 
-var temporal_difference = ui.Textbox({value: '12',style: {width: '40px'}});
+var temporal_difference = ui.Textbox({value: 12,style: {width: '40px'}});
 
-panel.add((ui.Panel([ui.Label('Sentinel-1-2 temporal difference (hours)'), temporal_difference],ui.Panel.Layout.flow('horizontal'))))
+panel.add((ui.Panel([ui.Label('Sentinel-1/-2 temporal difference (hours)'), temporal_difference],ui.Panel.Layout.flow('horizontal'))))
 
+// --- Null Handling Options ---
+var nullHandlingSelect = ui.Select({
+  items: [
+    {label: 'Exclude All Nulls', value: 'ExcludeAllNulls'},
+    {label: 'Include Optical Nulls', value: 'IncludeOpticalNulls'},
+    {label: 'Include All Nulls', value: 'IncludeAllNulls'}
+  ],
+  value: 'ExcludeAllNulls',
+  placeholder: 'Select Null Handling Option'
+});
+
+panel.add((ui.Panel([ui.Label('Null Handling', {fontWeight: 'bold'}), nullHandlingSelect],ui.Panel.Layout.flow('horizontal'))));
 
 // Apply Button
 var applyButton = ui.Button({
   label: 'Apply Settings & Run',
   onClick: function () {
+    
     var startDate = startDateInput.getValue();
     var endDate = endDateInput.getValue();
     var GenerateRandomPoints = genPointsCheckbox.getValue() ? 'YES' : 'NO';
@@ -261,122 +355,37 @@ var applyButton = ui.Button({
     var numberOfRandomPoints = numPointsSlider.getValue();
     var buffer = parseInt(bufferInput.getValue(), 10);
     var max_clouds = cloudSlider.getValue();
+    var QA_BAND = 'cs';
+    var CLEAR_THRESHOLD = thresholdSlider.getValue();
+    var speckleFiltering = CheckboxSpeckle.getValue() ? 'YES' : 'NO';
+    var kernelSize = speckleKernelInput.getValue();
+    var S1S2hoursDifference = temporal_difference.getValue();
+    var NullHandling = nullHandlingSelect.getValue();
+    var ROI = ee.FeatureCollection(assetTextbox.getValue());
 
-    var selectedOptical = opticalOptions.filter(function(opt, i) {
+    var listOfOpticalVIs = opticalOptions.filter(function(opt, i) {
       return opticalCheckboxes[i].getValue();
     });
-    var selectedSAR = sarOptions.filter(function(opt, i) {
+    var listOfSARindices = sarOptions.filter(function(opt, i) {
       return sarCheckboxes[i].getValue();
     });
 
     // Selected country for broadGeometry
-    var selectedCountry = countryDropdown.getValue();
-    var broadGeometry = countries.filter(ee.Filter.eq('ADM0_NAME', selectedCountry)).geometry();
+    var selectedCountry = countrySelector.getValue();
+    var broadGeometry = countries.filter(ee.Filter.eq('country_na', selectedCountry)).geometry();
 
     Map.clear(); // Optional: Clear previous layers
 
-    print('Selected Optical Indices:', selectedOptical);
-    print('Selected SAR Indices:', selectedSAR);
-    print('Land Cover:', ESA_LC_type);
-    print('Date Range:', startDate, 'to', endDate);
-    print('Generate Points:', GenerateRandomPoints);
-    print('Points:', numberOfRandomPoints, '| Buffer:', buffer, 'm | Max Cloud:', max_clouds + '%');
-    print('Selected Country:', selectedCountry);
+    // print('Selected Optical Indices:', selectedOptical);
+    // print('Selected SAR Indices:', selectedSAR);
+    // print('Land Cover:', ESA_LC_type);
+    // print('Date Range:', startDate, 'to', endDate);
+    // print('Generate Points:', GenerateRandomPoints);
+    // print('Points:', numberOfRandomPoints, '| Buffer:', buffer, 'm | Max Cloud:', max_clouds + '%');
+    // print('Selected Country:', selectedCountry);
 
     statusLabel.setValue('Settings updated successfully.');
     
-    // TODO: Add processing function calls here
-  }
-});
-panel.add(applyButton);
-
-
-
-// ========================================================================================
-// =========================== START OF USER SETTINGS =====================================
-// ========================================================================================
-
-
-
-
-// 1. Set start and end date for time series generation
-var startDate = '2021-01-01',
-    endDate =   '2022-01-01';
-
-// 2. Decide whether to generate random points based on a predefined land cover 
-//    dataset or upload your own data. 
-var GenerateRandomPoints = 'YES';
-/* 
-  If 'YES':
-          2.1. Set an integer value (10-100) to ESA_LC_type to define for which land cover type do you want to generate your random points.
-               Set 'ALL' if you want to include each land cover type. The ESA World Cover 2021 used here.
-               See the available land cover classes and their integer values: https://developers.google.com/earth-engine/datasets/catalog/ESA_WorldCover_v200 
-          2.2. Set how many random points to generate in the numberOfRandomPoints variable.
-          2.3. Set the buffer around random points (in meters) in the buffer variable.
-  If 'NO':
-          2.1. Set your own FeatureCollection in the ROI variable.
-*/
-
-// 2. A) Settings if 'YES' was set in GenerateRandomPoints
-var ESA_LC_type = 'ALL'; // use 'ALL' if you want to generate random points for each land cover type
-                        // set e.g. 10 for forest cover 
-var numberOfRandomPoints = 1000; 
-var buffer = 20;         // set a square buffer around points 
-
-// 2. B) Import and use your own FeatureCollection if 'NO' was set in GenerateRandomPoints
-var ROI = ee.FeatureCollection("users/danielp/philab/coniferous_FINAL");
-// for conif: "projects/danielp-cuni/assets/philab/conif_CentralEurope_FINAL"
-
-// 3. Select a broader geometry for your analysis, e.g. a country or draw/upload your own area
-var countries = ee.FeatureCollection("FAO/GAUL/2015/level0");
-
-// 3. A) Select a country
-// var broadGeometry = countries.filter(ee.Filter.eq('ADM0_NAME','Czech Republic'));
-
-// 3. B) Select the area based on your input data, applicable when you uploaded your own data in 2. B)
-var broadGeometry = ee.Feature(ROI.union().first()).bounds().buffer(1000).geometry(); // add a 1 km buffer
-
-// 4. Set Sentinel-2 data preprocessing 
-// 4.1. Set the maximum threshold for single image cloud coverage for S2 data
-var max_clouds = 30;
-
-// 4.2. Use 'cs' or 'cs_cdf' bands for cloud masking using CloudScore+.
-var QA_BAND = 'cs';
-
-// 4.3. Set the  threshold for cloud masking. 
-//      Higher values will remove thin clouds, haze & cirrus shadows.
-var CLEAR_THRESHOLD = 0.60;
-
-// 5. Select optical indices and parameters to include in the export
-//    predefined optionsare: 'NDVI','NDVIrededge','FAPAR','LAI', 'FAPAR_3b','LAI_3b', 'EVI','NDMI'
-var listOfOpticalVIs = ['NDVI','FAPAR','LAI','EVI'];
-
-// 6. Select SAR polarimetric indices to export.
-//    predefined options are: 'RVI', 'RFDI', 'NRPB','VH_VV','VV_VH', 'DPSVIm', 'DPSVIo'
-var listOfSARindices = ['VV','VH','RVI', 'RFDI', 'NRPB','VH/VV','VV/VH', 'DPSVIm'];
-
-// 7. Select whether to perform speckle filtering using Lee filter. 
-//    If 'YES', set the kernel window size. 
-//    Set 'NO' to do not perform speckle filtering.
-var speckleFiltering = 'YES';
-var kernelSize = 5;
-
-// 8. Set how many hours of difference between S1 and S2 images will be allwoed
-var S1S2hoursDifference = 24;
-
-// 9. Set export settings regarding Null values
-var NullHandling = 'ExcludeAllNulls';
-// 'ExcludeAllNulls'     = All Null values for both optical and SAR features will be excluded from the expored table.
-// 'IncludeOpticalNulls' = Null values for optical indices will be included in the expored table.
-// 'IncludeAllNulls'     = All Null values will be included in the expored table.
-
-// ========================================================================================
-// =============================== END OF USER SETTINGS ===================================
-// ========================================================================================
-
-
-
-
 
 // ========================================================================================
 // ================================ Load satellite data  ==================================
@@ -405,6 +414,14 @@ if (GenerateRandomPoints == 'YES'){
   
   
   Map.addLayer(ESAWC_selected.clip(broadGeometry), {}, 'Selected land cover type');
+  Map.centerObject(broadGeometry, 6);
+  
+  if (ownDataCheckbox.getValue() == true){
+    var broadGeometry = ee.Feature(ROI.union().first()).bounds().buffer(1000).geometry(); // add a 1 km buffer
+  }
+  else {
+    var broadGeometry = broadGeometry;
+  }
   
   // Create 1000 random points in the 20x20km bounding box
   var randomPoints = ee.FeatureCollection.randomPoints(broadGeometry, numberOfRandomPoints);
@@ -424,18 +441,20 @@ if (GenerateRandomPoints == 'YES'){
   if (ESA_LC_type == 'ALL') {
     // Select only areas that are fully inside one selected land cover type
     var validPoints = calculatedPoints.filter(ee.Filter.inList('mean',[10,20,30,40,50,60,70,80,90,95,100]));
+    print('Size of the final set of areas:', ROI.size())
+    
   } 
   else
     // Select points which fall (at least partly) into the masked region
     var validPoints = calculatedPoints.filter(ee.Filter.eq('mean', ESA_LC_type));
-  
+    print('Size of the final set of areas:', ROI.size())
+
   ROI = validPoints
 }
 else if(GenerateRandomPoints == 'NO'){
   ROI = ROI
 }
 
-print('Size of the final set of areas:', ROI.size())
 
 // Define a function to compute slope and aspect for each image
   var calculateSlopeAspect = function(image) {
@@ -479,7 +498,7 @@ print('Number of S-1 images after filtering', S1Collection.size());
 // =========================== SAR polarimtric indices  ===================================
 // ========================================================================================
 
-// Function to add radar polarimetric indices
+// Function to add kradar polarimetric indices
 var addSARIndices = function(img) {
   var VV = img.select('VV');
   var VH = img.select('VH');
@@ -697,7 +716,7 @@ var joined = addLIA.addLIA(joined,broadGeometry);
 // ============================================================================
 // ======================= SPECKLE FILTERING ==================================
 // ============================================================================
-var KERNEL_SIZE = 5; // for 5x5 filter
+var KERNEL_SIZE = kernelSize;
 
 var leefilter = function(image) {
 //---------------------------------------------------------------------------//
@@ -792,3 +811,11 @@ Export.table.toDrive({
 
 // Print some instructions for the user
 print('For data export click on "Tasks" bar on the right panel and click on "Run".')
+
+}
+});
+panel.add(applyButton);
+panel.add(ui.Label("To download the data, swipe down the code editor and RUN the export in 'Tasks' panel on the right handside.", {
+  color: 'gray',
+  margin: '6px 0px 0px 8px'
+}));
