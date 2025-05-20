@@ -7,6 +7,9 @@ A Google Earth Engine tool to generate multi-modal and time series datasets with
   - plus a land cover type based on ESA WorldCover 2021
 <br></br>
 
+### Access the tool using the [MMTS-GEE APP](https://code.earthengine.google.com/51a0791eb294520dc8c30034a299260d)
+[![image](https://github.com/user-attachments/assets/dfe92069-1eaf-45e2-b560-c2caa449290d)](https://code.earthengine.google.com/51a0791eb294520dc8c30034a299260d)
+
 The MMTS-GEE is designed to efficiently generate comprehensive datasets for multi-modal and multi-temporal analyses or various machine learning tasks. Its flexibility allows users to customize data generation for specific research goals.
 <br></br>
 If you use this tool, please cite the following paper:
