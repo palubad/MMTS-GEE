@@ -449,16 +449,45 @@ if (GenerateRandomPoints == 'YES'){
   
   if (ESA_LC_type == 'ALL') {
     // Select only areas that are fully inside one selected land cover type
-    var validPoints = calculatedPoints.select('mean','ESA_WC_LC_type').filter(ee.Filter.inList('ESA_WC_LC_type',[10,20,30,40,50,60,70,80,90,95,100]));
+    var validPoints = calculatedPoints.filter(ee.Filter.inList('mean',[10,20,30,40,50,60,70,80,90,95,100]));
     print('Size of the final set of areas:', ROI.size())
     
   } 
-  else
+  else if (ESA_LC_type == '10 - Tree cover'){
     // Select points which fall (at least partly) into the masked region
-    var validPoints = calculatedPoints.select('mean','ESA_WC_LC_type').filter(ee.Filter.eq('ESA_WC_LC_type', ESA_LC_type));
+    var validPoints = calculatedPoints.filter(ee.Filter.eq('mean', 10));
     print('Size of the final set of areas:', ROI.size())
 
   ROI = validPoints
+  }
+  else if (ESA_LC_type == '20 - Shrubland'){
+    // Select points which fall (at least partly) into the masked region
+    var validPoints = calculatedPoints.filter(ee.Filter.eq('mean', 20));
+    print('Size of the final set of areas:', ROI.size())
+
+  ROI = validPoints
+  }
+  else if (ESA_LC_type == '30 - Grassland'){
+    // Select points which fall (at least partly) into the masked region
+    var validPoints = calculatedPoints.filter(ee.Filter.eq('mean', 30));
+    print('Size of the final set of areas:', ROI.size())
+
+  ROI = validPoints
+  }
+  else if (ESA_LC_type == '40 - Cropland'){
+    // Select points which fall (at least partly) into the masked region
+    var validPoints = calculatedPoints.filter(ee.Filter.eq('mean', 40));
+    print('Size of the final set of areas:', ROI.size())
+
+  ROI = validPoints
+  }
+  else if (ESA_LC_type == '50 - Built-up'){
+    // Select points which fall (at least partly) into the masked region
+    var validPoints = calculatedPoints.filter(ee.Filter.eq('mean', 50));
+    print('Size of the final set of areas:', ROI.size())
+
+  ROI = validPoints
+  }
 }
 else if(GenerateRandomPoints == 'NO'){
   ROI = ROI
