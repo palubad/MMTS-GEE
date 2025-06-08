@@ -585,6 +585,7 @@ var addOpticalVI = function(img) {
                 img.normalizedDifference(['B8', 'B5']).rename('NDVIrededge'),
                 img.normalizedDifference(['B3', 'B8']).rename('NDWI'),
                 img.normalizedDifference(['B8', 'B11']).rename('NDMI'),
+                img.normalizedDifference(['B3', 'B11']).rename('NDSI'),
                 EVI
                 ]
               );
@@ -625,7 +626,7 @@ function addFAPARandLAI (img) {
 }
 
 // ========================================================================================
-// ================= Mask out clouds, shadows in S2 images  ======================
+// ================= Mask out clouds, shadows and snow in S2 images  ======================
 // ========================================================================================
 
 // ====================== Cloud masking using the Cloud Score+ ==================== //
@@ -654,11 +655,17 @@ function unmask_with_cloudPlus(img) {
 // Apply the function to get a cloudless image collection
 var S2_cloudMasked = linkedS2.map(unmask_with_cloudPlus);
 
+// Snow mask with Scene Classification Layer & a strict NDSI threshold (0)
+function snowMask (image){
+  return image.updateMask(image.select('NDSI').lt(0))
+              .updateMask(image.select('SCL').neq(11))
+}
+
 // // Add optical and SAR indices to the data
 var S2 = S2_cloudMasked.map(addOpticalVI)
                        .map(addFAPARandLAI)
+                       .map(snowMask)
                        .select(listOfOpticalVIs)
-
 
 // ========================================================================================
 // =========================== Add weather information  ===================================
